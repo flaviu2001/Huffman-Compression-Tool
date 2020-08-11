@@ -1,0 +1,40 @@
+#!/bin/bash
+
+name=""
+files=( )
+pos=1
+
+while [ $# -ne 0 ]; do
+	if [ "$1" == "-f" ]; then
+		shift 1
+		if [ $# -eq 0 ]; then
+			echo "Bad parameters"
+			exit 1
+		fi
+		name="$1"
+	else
+		if [ ! -f "$1" ] && [ ! -d "$1" ]; then
+			echo "$1 is not a valid file or directory."
+		else
+			files[$pos]="$1"
+			pos=$(($pos+1))
+		fi
+	fi
+	shift 1
+done
+
+if [ "$name" == "" ] || [ $pos -eq 1 ]; then
+	echo "Bad parameters"
+	exit 1
+fi
+
+tmp_name=$(basename "$name")
+
+if [ $pos -eq 2 ] && [ -f "${files[1]}" ]; then
+	"/home/flaviu/Tools/Utils/compress" "${files[1]}" "$name"
+else
+	if tar -cf "/tmp/$tmp_name" "${files[@]}"; then
+		"/home/flaviu/Tools/Utils/compress" "/tmp/$tmp_name" "$name"
+		rm "/tmp/$tmp_name"
+	fi
+fi

@@ -1,0 +1,34 @@
+#!/bin/bash
+
+if [ $# -ne 2 ] && [ $# -ne 1 ]; then
+	echo "Bad parameters"
+	exit 1
+fi
+
+target="$1"
+tmp_name=$(basename "$target")
+destination=""
+if [ $# -eq 2 ]; then
+	destination="$2"
+fi
+
+if ! "/home/flaviu/Tools/Utils/decompress" "$target" "/tmp/$tmp_name"; then
+	echo "Error decompressing"
+	exit 1
+fi
+
+if file "/tmp/$tmp_name" | grep -q "tar"; then
+	if [ "$destination" == "" ]; then
+		tar -xf "/tmp/$tmp_name"
+	else
+		mkdir "$destination"
+		cd "$destination"
+		tar -xf "/tmp/$tmp_name"
+	fi
+else
+	if [ "$destination" == "" ]; then
+		mv "/tmp/$tmp_name" "./$target.huf"
+	else
+		mv "/tmp/$tmp_name" "$destination"
+	fi
+fi
